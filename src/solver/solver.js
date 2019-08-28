@@ -1,9 +1,15 @@
-import Module from "../../out/solver.js";
+import Module from "../../solver.js";
+const instance = Module();
+
 
 export async function init(site) {
   await new Promise(resolve => setTimeout(resolve, 1000));
   const buildings = site.getBuildings();
   var nDataBytes = buildings.length * buildings.BYTES_PER_ELEMENT;
+
+
+  
+  const wrappedMove = instance.cwrap("move", null, ["number", "number"]);
 
   // Allocate memory inside the wasm module
   var dataPtr = instance._malloc(nDataBytes);
@@ -19,7 +25,7 @@ export async function init(site) {
 
   // Javascript wrapper to run an iteration
   function iterate() {
-
+    wrappedMove(dataPtr, buildings.length)
     const hasConverged = isEqual(buildings, data);
 
     site.setBuildings(data);
